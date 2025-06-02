@@ -26,17 +26,29 @@ export default function App() {
       <StatusBar
         style={isDarkMode ? "light" : "dark"}
         backgroundColor="transparent"
-        translucent
       />
+
       <TouchableOpacity style={styles.themeButton} onPress={toggleTheme}>
         {isDarkMode ? <Darkmode height={40} width={40} /> : <Lightmode height={40} width={40} />}
       </TouchableOpacity>
+
       <View style={styles.buttonContainer}>
         {sounds.map((sound, index) => (
           <TouchableOpacity key={index} onPress={() => playSound(index)} style={styles.button}>
             <Text style={styles.buttonText}>{sound.emoji}</Text>
           </TouchableOpacity>
         ))}
+        <TouchableOpacity style={styles.button}>
+            <Text style={{fontSize: 50, color: '#595959', transform: [{'translateY': -5}]}}>+</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.button} onPress={() => {
+          player.pause();
+          player.seekTo(0);
+        }}>
+          <Text>STOP</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -62,13 +74,16 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    padding: 10,
     margin: 10,
     borderRadius: 20,
     borderWidth: 4,
     borderColor: '#595959',
     boxShadow: '3px 3px 0px 0px rgb(88, 88, 88)',
     backgroundColor: '#fff',
+    height: 68,
+    width: 68,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: {
     fontSize: 30,
