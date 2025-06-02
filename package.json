@@ -9,19 +9,14 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "babel-plugin-module-resolver": "^5.0.2",
     "expo": "~53.0.9",
     "expo-audio": "~0.4.5",
     "expo-status-bar": "~2.2.3",
-    "metro-config": "^0.82.4",
-    "metro-react-native-babel-transformer": "^0.77.0",
     "react": "19.0.0",
     "react-native": "0.79.2",
-    "react-native-svg": "^15.11.2",
-    "react-native-vector-icons": "^10.2.0"
+    "react-native-svg": "^15.11.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
     "react-native-svg-transformer": "^1.5.1"
   },
   "private": true
