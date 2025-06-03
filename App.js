@@ -1,29 +1,74 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useAudioPlayer } from 'expo-audio';
-import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import sounds from './sounds.js';
+import { Accelerometer } from 'expo-sensors';
 import { useState, useEffect } from 'react';
 
+//sound imports
+import sounds from './sounds.js';
+
+//component imports
+import Add from './src/components/Add.js';
+
+//style imports
+import { styles } from './src/styles/app-style.js';
+
+//svg icon imports
 import Darkmode from './assets/icons/dark-mode.svg'
 import Lightmode from './assets/icons/light-mode.svg'
 import Edit from './assets/icons/edit.svg'
 import Check from './assets/icons/check.svg'
 import Cross from './assets/icons/cross.svg'
 import Stop from './assets/icons/stop.svg'
+import Phone from './assets/icons/phone.svg'
+import PhoneShake from './assets/icons/phone-shake.svg'
 
 export default function App() {
-  const player = useAudioPlayer();
+
+  const player = useAudioPlayer(sounds[0].sound);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [allSounds, setAllSounds] = useState(sounds);
   const [editMode, setEditMode] = useState(false);
-  const maxSound = 12;
+  const [isShakeEnabled, setIsShakeEnabled] = useState(false);
+  const [lastShakeTime, setLastShakeTime] = useState(0);
+  const [selectedSound, setSelectedSound] = useState(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   useEffect(() => {
     loadSavedSounds();
   }, []);
 
+  //shake to play sound
+  useEffect(() => {
+    let subscription;
+
+    if (isShakeEnabled) {
+      subscription = Accelerometer.addListener(accelerometerData => {
+        const { x, y, z } = accelerometerData;
+        const acceleration = Math.sqrt(x * x + y * y + z * z);
+        const now = Date.now();
+
+        if (acceleration > 1.5 && now - lastShakeTime > 1000) {
+          if (selectedSound) {
+            playSound(selectedSound);
+            setLastShakeTime(now);
+          } else {
+            playSound(0);
+            setLastShakeTime(now);
+          }
+        }
+      });
+    }
+
+    return () => {
+      if (subscription) {
+        subscription.remove();
+      }
+    };
+  }, [isShakeEnabled, lastShakeTime, selectedSound]);
+
+  //load saved sounds
   const loadSavedSounds = async () => {
     try {
       const savedSounds = await AsyncStorage.getItem('customSounds');
@@ -36,10 +81,9 @@ export default function App() {
     }
   };
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-  }
+  //sound related functions
 
+  //play sound
   const playSound = (index) => {
     const sound = allSounds[index];
     const audioSource = sound.sound.uri ? sound.sound : sound.sound;
@@ -48,36 +92,7 @@ export default function App() {
     player.play();
   }
 
-  const pickAudio = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'audio/*',
-        copyToCacheDirectory: true
-      });
-
-      if (result.canceled) {
-        return;
-      }
-
-      const newSound = {
-        emoji: '🎵',
-        name: result.assets[0].name,
-        sound: {
-          uri: result.assets[0].uri,
-          type: result.assets[0].mimeType || 'audio/mpeg'
-        }
-      };
-
-      setAllSounds(prevSounds => {
-        const updatedSounds = [...prevSounds, newSound];
-        saveSoundsToStorage(updatedSounds);
-        return updatedSounds;
-      });
-    } catch (err) {
-      Alert.alert('Error', 'Failed to pick audio file');
-    }
-  }
-
+  //delete sound
   const deleteSound = (index) => {
     setAllSounds(prevSounds => {
       const updatedSounds = prevSounds.filter((_, i) => i !== index);
@@ -96,102 +111,69 @@ export default function App() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: isDarkMode ? '#171717' : '#fff' }, { backgroundColor: editMode ? '#c9c9c9' : '#fff' }]}>
+    <View style={[styles.container, {backgroundColor: editMode ? '#c9c9c9' : isDarkMode ? '#171717' : '#fff',}]}>
       <StatusBar
         style={isDarkMode ? "light" : "dark"}
         backgroundColor="transparent"
         translucent
       />
 
-      <TouchableOpacity style={[styles.themeButton, { display: editMode ? 'none' : 'flex' }]} onPress={toggleTheme}>
+      {/* add sound component */}
+      <View style={[styles.addComponent, {display: isAddOpen ? 'flex' : 'none'}]}>
+        <Add setIsAddOpen={setIsAddOpen} setAllSounds={setAllSounds} saveSoundsToStorage={saveSoundsToStorage}/>
+      </View>
+
+      {/* theme button */}
+      <TouchableOpacity style={[styles.themeButton, { display: editMode ? 'none' : 'flex' }]} onPress={() => setIsDarkMode(!isDarkMode)}>
         {isDarkMode ? <Darkmode height={40} width={40} /> : <Lightmode height={40} width={40} />}
       </TouchableOpacity>
 
+      {/* edit button */}
       <TouchableOpacity style={styles.editButton} onPress={() => setEditMode(!editMode)}>
         {editMode ? <Check height={43} width={43} /> : <Edit height={40} width={40} />}
       </TouchableOpacity>
 
+      {/* button container */}
       <View style={styles.buttonContainer}>
         {allSounds.map((sound, index) => (
           <View key={index}>
+            {/* delete button */}
             <TouchableOpacity style={[styles.deleteButton, { display: editMode ? 'flex' : 'none' }]} onPress={() => deleteSound(index)}>
-
               <Cross height={20} width={20} />
-
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => playSound(index)} style={styles.button}>
+            
+            {/* sound button */}
+            <TouchableOpacity onPress={() => {
+              setSelectedSound(index);
+              playSound(index);
+            }} style={styles.button} disabled={editMode}>
               <Text style={styles.buttonText}>{sound.emoji}</Text>
             </TouchableOpacity>
           </View>
         ))}
-        <TouchableOpacity style={[styles.button, { display: allSounds.length >= maxSound ? 'none' : 'flex' }, { display: editMode ? 'none' : 'flex' }]} onPress={pickAudio} disabled={editMode}>
+
+        {/* add button */}
+        <TouchableOpacity style={[styles.button, { display: allSounds.length >= 12 ? 'none' : editMode ? 'none' : 'flex' }]} onPress={()=>{setIsAddOpen(true)}} disabled={editMode}>
           <Text style={{ fontSize: 50, color: '#595959', transform: [{ 'translateY': -5 }] }}>+</Text>
         </TouchableOpacity>
       </View>
-      <View style={{ justifyContent: 'center', alignItems: 'center', position: 'absolute', bottom: 150, left: 0, right: 0, zIndex: 1000 }}>
-        <TouchableOpacity onPress={() => {
+
+      {/* stop button */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', position: 'absolute', bottom: 150, left: 0, right: 0, zIndex: 1000, display: editMode ? 'none' : 'flex' }}>
+        <TouchableOpacity style={{position: 'fixed'}} onPress={() => {
           player.pause();
           player.seekTo(0);
         }}>
-          <Stop height={60} width={60} style={{ display: editMode ? 'none' : 'flex' }} />
+          <Stop height={60} width={60} />
+        </TouchableOpacity>
+
+        {/* shake to play sound button */}
+        <TouchableOpacity onPress={() => setIsShakeEnabled(!isShakeEnabled)}>
+          {isShakeEnabled ? <PhoneShake height={50} width={50} /> : <Phone height={40} width={40}  />}
         </TouchableOpacity>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-  },
-  themeButton: {
-    position: 'absolute',
-    left: 20,
-    top: 50,
-    zIndex: 1000,
-  },
-  editButton: {
-    position: 'absolute',
-    right: 20,
-    top: 50,
-    zIndex: 1000,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    margin: 10,
-    marginBottom: 120,
-  },
-  button: {
-    margin: 8,
-    borderRadius: 20,
-    borderWidth: 4,
-    borderColor: '#595959',
-    boxShadow: '2px 2px 0px 0px rgb(88, 88, 88)',
-    backgroundColor: '#fff',
-    height: 68,
-    width: 68,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonText: {
-    fontSize: 30,
-  },
-  deleteButton: {
-    borderColor: '#ff4040',
-    position: 'absolute',
-    right: 0,
-    borderWidth: 3,
-    width: 30,
-    height: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    borderRadius: 100,
-    boxShadow: '1px 1px 0px 0px rgb(255, 64, 64)',
-    zIndex: 1000,
-  }
-});
+StyleSheet.create(styles);

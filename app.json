@@ -3,6 +3,7 @@
     "name": "Blurt",
     "slug": "Blurt",
     "version": "1.0.0",
+    "icon": "./assets/icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -31,6 +32,13 @@
         "expo-document-picker",
         {
           "iCloudContainerEnvironment": "Production"
+        }
+      ],
+      "expo-font",
+      [
+        "expo-font",
+        {
+          "fonts": ["./assets/fonts/Inter-Regular.ttf", "./assets/fonts/Inter-Bold.ttf"]
         }
       ]
     ],
