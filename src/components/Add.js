@@ -52,6 +52,7 @@ const Add = ({ setIsAddOpen, setAllSounds, saveSoundsToStorage, isDarkMode }) =>
 
         setIsAddOpen(false);
         setResult(null);
+        setSelectedEmoji(null);
     }
 
     return (
