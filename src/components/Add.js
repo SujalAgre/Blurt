@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
-import EmojiSelector from 'react-native-emoji-selector'
+import EmojiSelector from './emoji-selector/index.js'
 
 const Add = ({ setIsAddOpen, setAllSounds, saveSoundsToStorage, isDarkMode }) => {
 
