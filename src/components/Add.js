@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import EmojiSelector from 'react-native-emoji-selector'
 
-const Add = ({ setIsAddOpen, setAllSounds, saveSoundsToStorage }) => {
+const Add = ({ setIsAddOpen, setAllSounds, saveSoundsToStorage, isDarkMode }) => {
 
     const [result, setResult] = useState(null);
-    const [selectedEmoji, setSelectedEmoji] = useState('🤣');
+    const [selectedEmoji, setSelectedEmoji] = useState(null);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
     //handle emoji select
@@ -27,7 +27,7 @@ const Add = ({ setIsAddOpen, setAllSounds, saveSoundsToStorage }) => {
                 return;
             }
             setResult(result);
-            
+
         } catch (err) {
             Alert.alert('Error', 'Failed to pick audio file');
         }
@@ -58,7 +58,7 @@ const Add = ({ setIsAddOpen, setAllSounds, saveSoundsToStorage }) => {
         <>
             {/* emoji picker */}
             {showEmojiPicker && (
-                <View style={styles.emojiPickerContainer}>
+                <View style={[styles.emojiPickerContainer, {backgroundColor: isDarkMode ? '#191919' : '#fff',}]}>
                     {/* emoji selector */}
                     <EmojiSelector
                         onEmojiSelected={handleEmojiSelect}
@@ -67,7 +67,7 @@ const Add = ({ setIsAddOpen, setAllSounds, saveSoundsToStorage }) => {
                         columns={7}
                     />
 
-                    <TouchableOpacity style={[styles.button, { marginTop: 10, borderColor: '#FF4B4B', boxShadow: '2px 2px 0px 0px #CF2121'}]} onPress={() => setShowEmojiPicker(false)}>
+                    <TouchableOpacity style={[styles.actionButton, { marginTop: 10, borderColor: '#FF4B4B', boxShadow: '2px 2px 0px 0px #CF2121' }]} onPress={() => setShowEmojiPicker(false)}>
                         <Text style={{ fontSize: 20, fontWeight: 'bold', paddingRight: 14, paddingLeft: 14, color: '#FF4B4B' }}>Cancel</Text>
                     </TouchableOpacity>
                 </View>
@@ -75,47 +75,39 @@ const Add = ({ setIsAddOpen, setAllSounds, saveSoundsToStorage }) => {
             )}
 
             {/* add container */}
-            <View style={styles.addContainer}>
+            <View style={[styles.addContainer, {backgroundColor: isDarkMode ? '#111111' : '#fff',}]}>
 
                 {/* button container */}
-                
-                <View style={styles.buttonContainer}>
-                    
-                    {/* related emoji*/}
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', marginLeft: 20, color: '#929292' }}>Related emoji</Text>
-                    <TouchableOpacity style={[styles.button, {marginRight: 10}]} onPress={() => setShowEmojiPicker(true)}>
-                        <Text style={{ fontSize: 17, paddingRight: 20, paddingLeft: 20 }}>{selectedEmoji}</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity style={[styles.button, {backgroundColor: isDarkMode ? '#191919' : '#fff',}]} onPress={() => setShowEmojiPicker(true)}>
+                    <Text style={{ fontSize: selectedEmoji ? 25 : 20, fontWeight: 'bold', color: '#929292' }}>{selectedEmoji ? selectedEmoji : 'Select emoji'}</Text>
+                </TouchableOpacity>
 
-                {/* audio picker */}
-                <View style={styles.buttonContainer}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', marginLeft: 20, color: '#929292' }}>{result?.assets[0]?.name ? result?.assets[0]?.name.slice(0, 12) + '...' : 'Choose a file'}</Text>
-                    <TouchableOpacity style={[styles.button, {marginRight: 10}]} onPress={pickAudio}>
-                        <Text style={{ fontSize: 17, fontWeight: 'bold', paddingRight: 4, paddingLeft: 4, color: '#6E6E6E' }}>Browse</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity style={[styles.button, {backgroundColor: isDarkMode ? '#191919' : '#fff',}]} onPress={pickAudio}>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#929292' }}>{result?.assets[0]?.name ? result?.assets[0]?.name.slice(0, 12) + '...' : 'Choose a file'}</Text>
+                </TouchableOpacity>
+                
 
                 {/* action container */}
                 <View style={styles.actionContainer}>
-                    
+
                     {/* cancel button */}
-                    <TouchableOpacity style={[styles.button, {marginLeft: 17, borderColor: '#FF4B4B', boxShadow: '2px 2px 0px 0px #CF2121'}]} onPress={() => {
+                    <TouchableOpacity style={[styles.actionButton, { marginLeft: 17, borderColor: '#FF4B4B', boxShadow: '2px 2px 0px 0px #CF2121', backgroundColor: isDarkMode ? '#191919' : 'white' }]} onPress={() => {
                         setIsAddOpen(false);
                         setResult(null);
+                        setSelectedEmoji(null);
                     }}>
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', paddingRight: 23, paddingLeft: 23, color: '#FF4B4B' }}>Cancel</Text>
+                        <Text style={{ fontSize: 20, fontWeight: 'bold', paddingRight: 23, paddingLeft: 23, color: '#FF4B4B',  }}>Cancel</Text>
                     </TouchableOpacity>
 
                     {/* save button */}
-                    <TouchableOpacity style={[styles.button, {marginRight: 17, borderColor: '#4FB242', boxShadow: '2px 2px 0px 0px #007E13'}]} onPress={addSound}>
+                    <TouchableOpacity disabled={!selectedEmoji || !result} style={[styles.actionButton, { marginRight: 17, borderColor: '#4FB242', boxShadow: '2px 2px 0px 0px #007E13', backgroundColor: isDarkMode ? '#191919' : 'white', opacity: !selectedEmoji || !result ? 0.5 : 1 }]} onPress={addSound}>
                         <Text style={{ fontSize: 20, fontWeight: 'bold', paddingRight: 27, paddingLeft: 27, color: '#4FB242' }}>Save</Text>
                     </TouchableOpacity>
                 </View>
             </View>
 
             {/* background */}
-            <View style={{backgroundColor: 'black', width: '100%', height: '100%', position: 'absolute', opacity: 0.3, zIndex: -1}}></View>
+            <View style={{ backgroundColor: 'black', width: '100%', height: '100%', position: 'absolute', opacity: 0.3, zIndex: -1 }}></View>
 
 
         </>
@@ -134,53 +126,30 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly',
         alignItems: 'center',
     },
-    buttonContainer: {
+    button: {
         flexDirection: 'row',
         backgroundColor: '#fff',
         width: '90%',
         height: '27%',
         borderWidth: 3,
-        borderColor: '#929292',
-        borderRadius: 40,
-        boxShadow: '2px 2px 0px 0pxrgb(122, 122, 122)',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-    },
-    button: {
-        padding: 5,
-        borderRadius: 30,
-        borderWidth: 3,
         borderColor: '#6E6E6E',
+        borderRadius: 40,
         boxShadow: '2px 2px 0px 0px #595959',
-        justifyContent: 'space-evenly',
-        alignItems: 'center',
-    },
+        justifyContent: 'center',
+        alignItems: 'center'
+    },    
     actionContainer: {
         flexDirection: 'row',
         width: '100%',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
-    customEmojiPicker: {
-        backgroundColor: 'white',
-        padding: 15,
-        borderRadius: 20,
+    actionButton: {
+        padding: 5,
+        borderRadius: 30,
         borderWidth: 3,
-        borderColor: '#595959',
-        boxShadow: '2px 2px 0px 0px rgb(88, 88, 88)',
-        position: 'absolute',
-        zIndex: 1000,
-    },
-    emojiGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    emojiButton: {
-        padding: 8,
-        margin: 2,
-        borderRadius: 5,
-        backgroundColor: '#f0f0f0',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
     },
     emojiPickerContainer: {
         backgroundColor: '#fff',

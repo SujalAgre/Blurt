@@ -30,7 +30,6 @@ export const styles = {
       borderWidth: 4,
       borderColor: '#595959',
       boxShadow: '2px 2px 0px 0px rgb(0, 0, 0)',
-      backgroundColor: '#fff',
       height: 68,
       width: 68,
       justifyContent: 'center',
@@ -48,7 +47,7 @@ export const styles = {
       height: 30,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: 'white',
+      
       borderRadius: 100,
       boxShadow: '1px 1px 0px 0px rgb(255, 64, 64)',
       zIndex: 1000,

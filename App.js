@@ -111,7 +111,7 @@ export default function App() {
   };
 
   return (
-    <View style={[styles.container, {backgroundColor: editMode ? '#c9c9c9' : isDarkMode ? '#171717' : '#fff',}]}>
+    <View style={[styles.container, {backgroundColor: isDarkMode ? '#111111' : '#fff',}]}>
       <StatusBar
         style={isDarkMode ? "light" : "dark"}
         backgroundColor="transparent"
@@ -120,7 +120,7 @@ export default function App() {
 
       {/* add sound component */}
       <View style={[styles.addComponent, {display: isAddOpen ? 'flex' : 'none'}]}>
-        <Add setIsAddOpen={setIsAddOpen} setAllSounds={setAllSounds} saveSoundsToStorage={saveSoundsToStorage}/>
+        <Add setIsAddOpen={setIsAddOpen} setAllSounds={setAllSounds} saveSoundsToStorage={saveSoundsToStorage} isDarkMode={isDarkMode}/>
       </View>
 
       {/* theme button */}
@@ -130,7 +130,7 @@ export default function App() {
 
       {/* edit button */}
       <TouchableOpacity style={styles.editButton} onPress={() => setEditMode(!editMode)}>
-        {editMode ? <Check height={43} width={43} /> : <Edit height={40} width={40} />}
+        {editMode ? <Check height={43} width={43}/> : <Edit height={40} width={40} />}
       </TouchableOpacity>
 
       {/* button container */}
@@ -138,7 +138,7 @@ export default function App() {
         {allSounds.map((sound, index) => (
           <View key={index}>
             {/* delete button */}
-            <TouchableOpacity style={[styles.deleteButton, { display: editMode ? 'flex' : 'none' }]} onPress={() => deleteSound(index)}>
+            <TouchableOpacity style={[styles.deleteButton, { display: editMode && index > sounds.length - 1 ? 'flex' : 'none', backgroundColor: isDarkMode ? '#111111' : 'white', }]} onPress={() => deleteSound(index)}>
               <Cross height={20} width={20} />
             </TouchableOpacity>
             
@@ -146,14 +146,14 @@ export default function App() {
             <TouchableOpacity onPress={() => {
               setSelectedSound(index);
               playSound(index);
-            }} style={styles.button} disabled={editMode}>
+            }} style={[styles.button, {backgroundColor: isDarkMode ? '#191919' : 'white',}]} disabled={editMode}>
               <Text style={styles.buttonText}>{sound.emoji}</Text>
             </TouchableOpacity>
           </View>
         ))}
 
         {/* add button */}
-        <TouchableOpacity style={[styles.button, { display: allSounds.length >= 12 ? 'none' : editMode ? 'none' : 'flex' }]} onPress={()=>{setIsAddOpen(true)}} disabled={editMode}>
+        <TouchableOpacity style={[styles.button, { display: allSounds.length >= 12 ? 'none' : editMode ? 'none' : 'flex', backgroundColor: isDarkMode ? '#191919' : 'white',}]} onPress={()=>{setIsAddOpen(true)}} disabled={editMode}>
           <Text style={{ fontSize: 50, color: '#595959', transform: [{ 'translateY': -5 }] }}>+</Text>
         </TouchableOpacity>
       </View>
