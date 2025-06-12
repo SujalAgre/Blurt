@@ -23,7 +23,7 @@
 
 ## 📦 Download
 
-- [**Android:**](https://github.com/SujalAgre/Blurt/releases/download/v1.0/blurt-app.apk)
+- [**Android**](https://github.com/SujalAgre/Blurt/releases/download/v1.0/blurt-app.apk)
 - **iOS:** Coming soon
 
 ## ⚙️ Tech Stack
